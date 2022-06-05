@@ -1,0 +1,244 @@
+# Case Study of Divvy Cyclist Bike Sharing : Convert Casual Riders into Annual Members
+
+In 2016, Cyclistic launched a successful bike-share oﬀering. Since then, the program has grown to a ﬂeet of 5,824 bicycles that are geotracked and locked into a network of 692 stations across Chicago. The bikes can be unlocked from one station and returned to any other station in the system anytime.
+
+Cyclistic’s ﬁnance analysts have concluded that annual members are much more proﬁtable than casual riders. Although the pricing ﬂexibility helps Cyclistic attract more customers, Moreno believes that maximizing the number of annual members will be key to future growth.
+
+Rather than creating a marketing campaign that targets all-new customers, Moreno believes there is avery good chance to convert casual riders into members. She notes that casual riders are already aware of the Cyclistic program and have chosen Cyclistic for their mobility needs.
+
+Moreno has set a clear goal: Design marketing strategies aimed at converting casual riders into annual members. In order to do that, however, the marketing analyst team needs to better understand how annual members and casual riders diﬀer, why casual riders would buy a membership, and how digital media could aﬀect their marketing tactics.
+
+Moreno and her team are interested in analyzing the Cyclistic historical bike trip data to identify trends.
+
+#Task Details
+
+```{r}
+#installing all the packages
+install.packages('tidyverse',dependencies = TRUE)
+library(tidyverse)
+install.packages('skimr')
+library(skimr)
+install.packages("ggplot2")
+install.packages('tidyselect')
+
+
+```
+
+My task to is to find out how annual members and non members are different. Help client to make more profit in the business. Help more customers to become members.
+
+The finding can help company to find out the way to attract more customer to become members. find out more about annual members and non members. Find out the most suitable way to marketing and campaigns.
+
+Next to see deatils of the data I used str and colnames 
+```{r}
+#display all column names from Dataframes
+
+Divvy_Trips_2019_Q2 <- read_csv("Divvy_Trips_2019_Q2.csv")
+Divvy_Trips_2019_Q3 <- read_csv("Divvy_Trips_2019_Q3.csv")
+Divvy_Trips_2019_Q4 <- read_csv("Divvy_Trips_2019_Q4.csv")
+Divvy_Trips_2020_Q1 <- read_csv("Divvy_Trips_2020_Q1.csv")
+
+head(Divvy_Trips_2019_Q2)
+colnames(Divvy_Trips_2019_Q2)
+colnames(Divvy_Trips_2019_Q3)
+colnames(Divvy_Trips_2019_Q4)
+colnames(Divvy_Trips_2020_Q1)
+
+str(Divvy_Trips_2019_Q2)
+str(Divvy_Trips_2019_Q3)
+str(Divvy_Trips_2019_Q4)
+str(Divvy_Trips_2020_Q1)
+```
+
+rename column names in all data frame for consistency.
+```{r}
+
+Q2_2019 <- rename(Divvy_Trips_2019_Q2, ride_id = '01 - Rental Details Rental ID'
+                 ,rideable_type = '01 - Rental Details Bike ID'
+                 ,started_at = '01 - Rental Details Local Start Time'
+                 ,ended_at = '01 - Rental Details Local End Time'
+                 ,start_station_name =  '03 - Rental Start Station Name'
+                 ,start_station_id = '03 - Rental Start Station ID'
+                 ,end_station_name =  '02 - Rental End Station Name'
+                 ,end_station_id = '02 - Rental End Station ID'
+                 ,member_casual = 'User Type')
+
+            
+
+str(Q2_2019)    
+Q3_2019 <- rename(Divvy_Trips_2019_Q3
+                   ,ride_id = trip_id
+                   ,rideable_type = bikeid 
+                   ,started_at = start_time  
+                   ,ended_at = end_time  
+                   ,start_station_name = from_station_name 
+                   ,start_station_id = from_station_id 
+                   ,end_station_name = to_station_name 
+                   ,end_station_id = to_station_id 
+                   ,member_casual = usertype)
+str(Q3_2019)
+(Q4_2019 <- rename(Divvy_Trips_2019_Q4
+                   ,ride_id = trip_id
+                   ,rideable_type = bikeid 
+                   ,started_at = start_time  
+                   ,ended_at = end_time  
+                   ,start_station_name = from_station_name 
+                   ,start_station_id = from_station_id 
+                   ,end_station_name = to_station_name 
+                   ,end_station_id = to_station_id 
+                   ,member_casual = usertype))
+
+str(Q4_2019)
+
+colnames(Q2_2019)
+colnames(Q3_2019)
+colnames(Q4_2019)
+
+str(Q2_2019)
+str(Q3_2019)
+str(Q4_2019)
+
+```
+firstrow of Q2_2019 data had column detaild so removing the first row then changing the ride_id column name  and ride_id to character type in all the data frame. changing station ID from q2_2019 to integer for consistency with other data frames.  
+combining 4 quarter data in single data frame
+```{r}
+# remove top row from Q2_2019
+
+Q2_2019<- subset.data.frame(Q2_2019, ride_id != "01 - Rental Details Rental ID")
+head(Q2_2019)
+
+# update data types of the columns in Q2,Q3,Q4 2019
+
+Q4_2019 <-  mutate(Q4_2019, ride_id = as.character(ride_id)
+                   ,rideable_type = as.character(rideable_type)) 
+Q3_2019 <-  mutate(Q3_2019, ride_id = as.character(ride_id)
+                   ,rideable_type = as.character(rideable_type)) 
+Q2_2019 <-  mutate(Q2_2019, ride_id = as.character(ride_id)
+                   ,rideable_type = as.character(rideable_type))
+Q2_2019 <-  mutate(Q2_2019, start_station_id  = as.integer(start_station_id)
+                   ,end_station_id  = as.integer(end_station_id))
+
+# checking for the changes
+
+str(Q2_2019)
+str(Q3_2019)
+str(Q4_2019)
+str(Divvy_Trips_2020_Q1)
+
+```
+ combining all 4 qurter data in single data frame for analysis.
+```{r}
+Divvy_trips<- bind_rows(Q2_2019,Q3_2019,Q4_2019,Divvy_Trips_2020_Q1)
+head(Divvy_trips)
+
+colnames(Divvy_trips)
+# removing the columns longitude and latitude, birth year , gender)
+Divvy_trips<- Divvy_trips %>% 
+  select(-c(V5,V11,V12,gender,birthyear,start_lat,start_lng,end_lat,end_lng,tripduration))
+
+
+#summarize data frame
+# check list of columns now available
+colnames(Divvy_trips)
+nrow(Divvy_trips)
+dim(Divvy_trips)
+str(Divvy_trips)
+summary(Divvy_trips)
+
+```
+ 
+ I have to organize data for consistency and analysis. 
+ 1- change member_casual field values for consistency, in Q2 2019, subscriber was used for members and customers for casuals.
+ 2-Get day, month, and year from date field.
+ 3-Calculate ride length field from endat-startat field to caluculate how member/casual customers are spending time.
+```{r}
+#for consistency updating values in member_casual from subscriber=member, customer=casual
+Divvy_trips<-Divvy_trips %>% 
+  mutate(member_casual=recode(member_casual
+                              ,"Subscriber"="member"
+                              ,"Customer"="casual"))
+
+table(Divvy_trips$date)
+#add date columns so that data can be summarized on day, week or month 
+#took date from start_at column
+
+Divvy_trips$date <- as.Date(Divvy_trips$started_at) #The default format is yyyy-mm-dd
+Divvy_trips$month <- format(as.Date(Divvy_trips$date), "%m")
+Divvy_trips$day <- format(as.Date(Divvy_trips$date), "%d")
+Divvy_trips$year <- format(as.Date(Divvy_trips$date), "%Y")
+Divvy_trips$day_of_week <- format(as.Date(Divvy_trips$date), "%A")
+
+head(Divvy_trips)
+
+#calculate ride_length in seconds from ended_at-started_at
+Divvy_trips$ride_length <- difftime(Divvy_trips$ended_at,Divvy_trips$started_at)
+#
+head(Divvy_trips)
+
+
+str(Divvy_trips)
+# check type of the ride_length column
+is.factor(Divvy_trips$ride_length)
+is.numeric(Divvy_trips$ride_length)
+is.character(Divvy_trips$ride_length)
+#converting the ride_length in to numeric
+Divvy_trips$ride_length<- as.numeric(as.character(Divvy_trips$ride_length))
+#checking the type
+is.numeric(Divvy_trips$ride_length)
+
+```
+ 
+in some records bikes are checked out for maintenance(marked as HQ/QR as start station or ride length<0) , removing those observations.
+
+```{r}
+#removing the rows which has HQ QR as start station or ride_length< 0 (maintenance checkout)
+Divvy_trips_1<- Divvy_trips[!(Divvy_trips$start_station_name=="HQ QR"|Divvy_trips$ride_length<0),]
+head(Divvy_trips_1)
+nrow(Divvy_trips)
+nrow(Divvy_trips_1)
+```
+
+aggregated data for ride_length with member/casual and ride_length with day of week, realize the weeks and not in order. ordred days of week in desired order.
+```{r}
+
+mean(Divvy_trips_1$ride_length)
+median(Divvy_trips_1$ride_length)
+min(Divvy_trips_1$ride_length)
+max(Divvy_trips_1$ride_length)
+
+#aggregate() ride_length on members/casuals
+aggregate(Divvy_trips_1$ride_length ~ Divvy_trips_1$member_casual, FUN = mean)
+aggregate(Divvy_trips_1$ride_length ~ Divvy_trips_1$member_casual, FUN = median)
+aggregate(Divvy_trips_1$ride_length ~ Divvy_trips_1$member_casual, FUN = min)
+aggregate(Divvy_trips_1$ride_length ~ Divvy_trips_1$member_casual, FUN = max)
+#aggregate data on members/casuals and day of the week
+aggregate(Divvy_trips_1$ride_length ~ Divvy_trips_1$member_casual+Divvy_trips_1$day_of_week,FUN = mean)
+
+Divvy_trips_1$day_of_week<-ordered(Divvy_trips_1$day_of_week,levels=c("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"))
+
+
+```
+grouping by the data on weekday , summarizing on number of rides and mean of average duration. summarized data is saved as divvy_trips_1_org1 data frame.
+```{r}
+install.packages("lubridate")
+library(lubridate)
+```
+
+
+```{r}
+Divvy_trips_1_org1<-Divvy_trips_1 %>% mutate(weekday = wday(started_at,label = TRUE)) %>% 
+  group_by(member_casual,weekday) %>% 
+  summarise(numberofrides=n(),average_duration=mean(ride_length)) %>% 
+  arrange(member_casual,weekday)
+
+Divvy_trips_1_org1
+```
+visualized the data and saved data as csv to be unsed in tableau.
+```{r}
+Divvy_trips_1_org1 %>% ggplot(aes(x=weekday,y=numberofrides,fill=member_casual))+geom_col(position = "dodge")
+
+Divvy_trips_1_org1 %>% ggplot(aes(x=weekday,y=average_duration,fill=member_casual))+geom_col(position="dodge" )
+
+#write_csv(Divvy_trips_1,file="./Divvy_trips_1.csv")
+
+```
+
